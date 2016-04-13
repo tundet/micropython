@@ -1,6 +1,8 @@
 from pyb import Pin, ADC, UART, I2C
 import char_lcd
 import time
+import math
+import binascii
 
 print ("kek")
 
@@ -21,9 +23,40 @@ while True:
 	
 	
 	temp = adc.read()
-	i2c.send(0x43, 0x39)
-	light = i2c.recv(1, 0x39)
 
+	i2c.send(0x43, 0x39)					#Lähetetään 0-sensorilta heksalukuarvo vastaanottimeen.
+	data0 = i2c.recv(1, 0x39)[0]				#Vastaanotetaan arvo ja muutetaan se binääriluvuksi.
+	#print(bin(data0)[2:10])	
+	chordBits0 = bin(data0)[3:6]				#Muutetaan binäärilukujakson 2.-4. luvut kymmenjärjestelmän luvuksi.
+	chordNumber0 = int(chordBits0, 2)
+	chordValue0 = int(16.5*((2 ** chordNumber0) - 1))	#Laskukaavaa joka oli esimerkissä, tekee jotain oleellista.
+	#print(chordValue0)
+	stepValue0 = 2 ** chordNumber0				#Laskukaavaa joka oli esimerkissä, tekee jotain oleellista.
+	#print (stepValue0)
+	stepBits0 = bin(data0)[6:10]				#Muutetaan binäärilukujakson 5.-8. luvut kymmenjärjestelmän luvuiksi.
+	stepNumber0 = int(stepBits0, 2)				#Laskukaavaa joka oli esimerkissä, tekee jotain oleellista.
+	#print (stepNumber0)
+	countValue0 = ((chordValue0) + (stepValue0) + (stepNumber0))	#Laskukaavaa joka oli esimerkissä, tekee jotain oleellista.
+	#print (countValue0)
+	i2c.send(0x83, 0x39)						#Lähetetään 1-sensorilta heksalukuarvo vastaanottimeen.
+	data1 = i2c.recv(1, 0x39)[0]				#Vastaanotetaan arvo ja muutetaan se binääriluvuksi.
+	#print(bin(data1)[2:10])
+	chordBits1 = bin(data1)[3:6]				#Muutetaan binäärilukujakson 2.-4. luvut kymmenjärjestelmän luvuiksi.
+	chordNumber1 = int(chordBits1, 2)
+	chordValue1 = int(16.5*((2 ** chordNumber1) - 1))	#Laskukaavaa joka oli esimerkissä, tekee jotain oleellista.
+	#print(chordValue1)
+	stepValue1 = 2 ** chordNumber1				#Laskukaavaa joka oli esimerkissä, tekee jotain oleellista.
+	#print (stepValue1)
+	stepBits1 = bin(data1)[6:10]				#Muutetaan binäärilukujakson 5.-8. luvut kymmenjärjestelmän luvuiksi.
+	stepNumber1 = int(stepBits1, 2)				#Laskukaavaa joka oli esimerkissä, tekee jotain oleellista.
+	#print (stepNumber1)
+	countValue1 = ((chordValue1) + (stepValue1) + (stepNumber1))	#Laskukaavaa joka oli esimerkissä, tekee jotain oleellista.
+	#print (countValue1)
+	R = (countValue1)/(countValue0)				#Lasketaan sensorien antamien kokonaisarvojen suhde.
+	lightLevel = (countValue0) * 0.46 * (math.e ** (-3.13*R))	#Lasketaan valoisuusanturin lähettämän syötteen määrä lukseina. (math.e on neperin luku)
+	print(lightLevel)							#Tulostetaan valaistusvoimakkuuden arvo.
+
+	
 	def changetemp(temp):
 		
 		URX = (temp / 4095) * 3.3
@@ -36,7 +69,7 @@ while True:
 			wiw = 5 * wow
 			wuw = 20 + wiw
 			decimaltemp = "%.2f" % wuw
-			print("LÃ¤mpÃ¶tila on: ", decimaltemp)
+			print("Temperature is: ", decimaltemp)
 			message(decimaltemp)
 			
 		elif Rx > 1772 and Rx <= 1922:
@@ -46,7 +79,7 @@ while True:
 			wiw = 10 * wow
 			wuw = 10 + wiw
 			decimaltemp = "%.2f" % wuw
-			print("LÃ¤mpÃ¶tila on: ", decimaltemp)
+			print("Temperature is: ", decimaltemp)
 			message(decimaltemp)
 		
 		elif Rx > 2000 and Rx <= 2080:
@@ -56,13 +89,13 @@ while True:
 			wiw = 5 * wow
 			wuw = 25 + wiw
 			decimaltemp = "%.2f" % wuw
-			print("LÃ¤mpÃ¶tila on: ", decimaltemp)
+			print("Temperature is: ", decimaltemp)
 			message(decimaltemp)
 
 	def message(temp):
 
-		alku = (21, 5, 750, 1, light, temp)
-		a = str(alku)
+		array = (21, 5, 750, 1, lightLevel, temp)
+		a = str(array)
 
 		print(a)
 		sendmessage(a)
@@ -83,3 +116,5 @@ while True:
 	
 	
 	
+
+
