@@ -12,49 +12,49 @@ i2c = I2C(1, I2C.MASTER, baudrate = 9600)
 i2clcd = I2C(2, I2C.MASTER, baudrate = 9600)
 d = char_lcd.HD44780(i2clcd)
 
-d.set_line(0)
-d.set_string("Jotain mukavaa")
+d.set_line(0) 
+d.set_string("Jotain mukavaa") 					#Print out text on first line on the LCD screen
 d.set_line(1)
-d.set_string("Viela mukavampaa")
+d.set_string("Viela mukavampaa") 				#Print out text on second line on the LCD screen
 
 
 
 while True:
 	
 	
-	temp = adc.read()
+	temp = adc.read()							#Read temperature value
 
-	i2c.send(0x43, 0x39)					#L‰hetet‰‰n 0-sensorilta heksalukuarvo vastaanottimeen.
-	data0 = i2c.recv(1, 0x39)[0]				#Vastaanotetaan arvo ja muutetaan se bin‰‰riluvuksi.
+	i2c.send(0x43, 0x39)						#Send hexadecimal to receiver from sensor 0.
+	data0 = i2c.recv(1, 0x39)[0]				#Receive value and convert it to binary number.
 	#print(bin(data0)[2:10])	
-	chordBits0 = bin(data0)[3:6]				#Muutetaan bin‰‰rilukujakson 2.-4. luvut kymmenj‰rjestelm‰n luvuksi.
+	chordBits0 = bin(data0)[3:6]				#Convert binary period 2.-4. numbers into decimal numbers.
 	chordNumber0 = int(chordBits0, 2)
-	chordValue0 = int(16.5*((2 ** chordNumber0) - 1))	#Laskukaavaa joka oli esimerkiss‰, tekee jotain oleellista.
+	chordValue0 = int(16.5*((2 ** chordNumber0) - 1))	#Formula needed to get the value in luxes.
 	#print(chordValue0)
-	stepValue0 = 2 ** chordNumber0				#Laskukaavaa joka oli esimerkiss‰, tekee jotain oleellista.
+	stepValue0 = 2 ** chordNumber0				#Formula needed to get the value in luxes.
 	#print (stepValue0)
-	stepBits0 = bin(data0)[6:10]				#Muutetaan bin‰‰rilukujakson 5.-8. luvut kymmenj‰rjestelm‰n luvuiksi.
-	stepNumber0 = int(stepBits0, 2)				#Laskukaavaa joka oli esimerkiss‰, tekee jotain oleellista.
+	stepBits0 = bin(data0)[6:10]				#Convert binary period 5.-8. numbers into decimal numbers.
+	stepNumber0 = int(stepBits0, 2)				#Formula needed to get the value in luxes.
 	#print (stepNumber0)
-	countValue0 = ((chordValue0) + (stepValue0) + (stepNumber0))	#Laskukaavaa joka oli esimerkiss‰, tekee jotain oleellista.
+	countValue0 = ((chordValue0) + (stepValue0) + (stepNumber0))	#Formula needed to get the value in luxes.
 	#print (countValue0)
-	i2c.send(0x83, 0x39)						#L‰hetet‰‰n 1-sensorilta heksalukuarvo vastaanottimeen.
-	data1 = i2c.recv(1, 0x39)[0]				#Vastaanotetaan arvo ja muutetaan se bin‰‰riluvuksi.
+	i2c.send(0x83, 0x39)						#Send hexadecimal to receiver from sensor 1.
+	data1 = i2c.recv(1, 0x39)[0]				#Receive value and convert it to binary number.
 	#print(bin(data1)[2:10])
-	chordBits1 = bin(data1)[3:6]				#Muutetaan bin‰‰rilukujakson 2.-4. luvut kymmenj‰rjestelm‰n luvuiksi.
+	chordBits1 = bin(data1)[3:6]				Convert binary period 2.-4. numbers into decimal numbers.
 	chordNumber1 = int(chordBits1, 2)
-	chordValue1 = int(16.5*((2 ** chordNumber1) - 1))	#Laskukaavaa joka oli esimerkiss‰, tekee jotain oleellista.
+	chordValue1 = int(16.5*((2 ** chordNumber1) - 1))	#Formula needed to get the value in luxes.
 	#print(chordValue1)
-	stepValue1 = 2 ** chordNumber1				#Laskukaavaa joka oli esimerkiss‰, tekee jotain oleellista.
+	stepValue1 = 2 ** chordNumber1				#Formula needed to get the value in luxes.
 	#print (stepValue1)
-	stepBits1 = bin(data1)[6:10]				#Muutetaan bin‰‰rilukujakson 5.-8. luvut kymmenj‰rjestelm‰n luvuiksi.
-	stepNumber1 = int(stepBits1, 2)				#Laskukaavaa joka oli esimerkiss‰, tekee jotain oleellista.
+	stepBits1 = bin(data1)[6:10]				#Convert binary period 5.-8. numbers into decimal numbers.
+	stepNumber1 = int(stepBits1, 2)				#Formula needed to get the value in luxes.
 	#print (stepNumber1)
-	countValue1 = ((chordValue1) + (stepValue1) + (stepNumber1))	#Laskukaavaa joka oli esimerkiss‰, tekee jotain oleellista.
+	countValue1 = ((chordValue1) + (stepValue1) + (stepNumber1))	#Formula needed to get the value in luxes.
 	#print (countValue1)
-	R = (countValue1)/(countValue0)				#Lasketaan sensorien antamien kokonaisarvojen suhde.
-	lightLevel = (countValue0) * 0.46 * (math.e ** (-3.13*R))	#Lasketaan valoisuusanturin l‰hett‰m‰n syˆtteen m‰‰r‰ lukseina. (math.e on neperin luku)
-	print(lightLevel)							#Tulostetaan valaistusvoimakkuuden arvo.
+	R = (countValue1)/(countValue0)				#Calculate the ratio of the total values the sensors gave.
+	lightLevel = (countValue0) * 0.46 * (math.e ** (-3.13*R))	#Convert the value given by the light sensor into lux. (math.e is a neper number)
+	print(lightLevel)							#Prin out the value of the illuminance.
 
 	
 	def changetemp(temp):
