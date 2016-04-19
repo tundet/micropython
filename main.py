@@ -196,7 +196,6 @@ while True:
 		
 			
 
-		
 	#changetemp(temp)
 	keypad()
 	#time.sleep(5)
