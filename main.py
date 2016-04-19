@@ -58,7 +58,8 @@ while True:
 
 	
 	def changetemp(temp):
-		
+	
+		#Convert the value the temperature sensor gives into celsius:
 		URX = (temp / 4095) * 3.3
 		Rx = (URX * 1780) / (3.3 - URX)
 		
@@ -88,19 +89,22 @@ while True:
 			wow = wew / 80
 			wiw = 5 * wow
 			wuw = 25 + wiw
-			decimaltemp = "%.2f" % wuw
+			decimaltemp = "%.2f" % wuw 	
 			print("Temperature is: ", decimaltemp)
 			message(decimaltemp)
 
 	def message(temp):
-
+	
+		#Creating message.
 		array = (21, 5, 750, 1, lightLevel, temp)
 		a = str(array)
 
 		print(a)
 		sendmessage(a)
 
-	def sendmessage(a):	
+	def sendmessage(a):
+
+		#Sending message and removing the unneccesary marks.
 		a = a+ '\n'
 		a = a.replace("(", "")
 		a = a.replace(")", "")
