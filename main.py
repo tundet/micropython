@@ -3,24 +3,21 @@ import char_lcd
 import time
 import math
 import binascii
-
+import pyb
 print ("kek")
 
 adc = ADC(Pin('X1'))
 uart = UART(6, 115200)
 i2c = I2C(1, I2C.MASTER, baudrate = 9600)
-i2clcd = I2C(2, I2C.MASTER, baudrate = 9600)
-d = char_lcd.HD44780(i2clcd)
+i2c2 = I2C(2, I2C.MASTER, baudrate = 9600)
+d = char_lcd.HD44780(i2c2)
 
 d.set_line(0) 
 d.set_string("Jotain mukavaa") 					#Print out text on first line on the LCD screen
 d.set_line(1)
 d.set_string("Viela mukavampaa") 				#Print out text on second line on the LCD screen
 
-
-
-while True:
-	
+while True:	
 	
 	temp = adc.read()							#Read temperature value
 
@@ -54,8 +51,7 @@ while True:
 	#print (countValue1)
 	R = (countValue1)/(countValue0)				#Calculate the ratio of the total values the sensors gave.
 	lightLevel = (countValue0) * 0.46 * (math.e ** (-3.13*R))	#Convert the value given by the light sensor into lux. (math.e is a neper number)
-	print(lightLevel)							#Prin out the value of the illuminance.
-
+	#print(lightLevel)							#Prin out the value of the illuminance.
 	
 	def changetemp(temp):
 	
@@ -112,13 +108,96 @@ while True:
 		a = a.replace(" ", "")
 		uart.write(bytes(a.encode('ascii')))
 		
+	def keypad () :
+		
+		#Initial configuration
+		i2c2.mem_write(0xFF, 0x20, 0x0C)
+		i2c2.mem_write(0xFF, 0x20, 0x00)
+		i2c2.mem_write(0x00, 0x20, 0x14)
+		
+		#Reading (COL1)
+		i2c2.mem_write(0xEF, 0x20, 0x00)
+		k1 = i2c2.mem_read(1, 0x20, 0x12)
+		c1 = k1[0] & 0x2B
+		#print(c1)
+		#35 = *
+		#41 = 7
+		#42 = 4
+		#11 = 1
+		
+		#Reading (COL2)
+		i2c2.mem_write(0xBF, 0x20, 0x00)
+		k2 = i2c2.mem_read(1, 0x20, 0x12)
+		c2 = k2[0] & 0x2B
+		#print(c2)
+		#35 = 0
+		#41 = 8
+		#42 = 5
+		#11 = 2
+		
+		#Reading (COL3)
+		i2c2.mem_write(0xFB, 0x20, 0x00)
+		k3 = i2c2.mem_read(1, 0x20, 0x12)
+		c3 = k3[0] & 0x2B
+		#print(c3)
+		#35 = #
+		#41 = 9
+		#42 = 6
+		#11 = 3
+		
+		if c1 != 43:
+			if c1 == 35:
+				print("*")
+				pyb.delay(200)
+			elif c1 == 41:
+				print("7")
+				pyb.delay(200)
+			elif c1 == 42:
+				print("4")
+				pyb.delay(200)
+			elif c1 == 11:
+				print("1")
+				pyb.delay(200)
+			else:
+				print("error")
+				pyb.delay(200)
+				
+		elif c2 != 43:
+			if c2 == 35:
+				print("0")
+				pyb.delay(200)
+			elif c2 == 41:
+				print("8")
+				pyb.delay(200)
+			elif c2 == 42:
+				print("5")
+				pyb.delay(200)
+			elif c2 == 11:
+				print("2")
+				pyb.delay(200)
+			else:
+				print("error")
+			
+		elif c3 != 43:
+			if c3 == 35:
+				print("#")
+				pyb.delay(200)
+			elif c3 == 41:
+				print("9")
+				pyb.delay(200)
+			elif c3 == 42:
+				print("6")
+				pyb.delay(200)
+			elif c3 == 11:
+				print("3")
+				pyb.delay(200)
+			else:
+				print("error")
+		
+			
 
-
-
-	changetemp(temp)
-	time.sleep(5)
+		
+	#changetemp(temp)
+	keypad()
+	#time.sleep(5)
 	
-	
-	
-
-
