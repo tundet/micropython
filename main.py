@@ -41,7 +41,7 @@ while True:
 	i2c.send(0x83, 0x39)						#Send hexadecimal to receiver from sensor 1.
 	data1 = i2c.recv(1, 0x39)[0]				#Receive value and convert it to binary number.
 	#print(bin(data1)[2:10])
-	chordBits1 = bin(data1)[3:6]				Convert binary period 2.-4. numbers into decimal numbers.
+	chordBits1 = bin(data1)[3:6]				#Convert binary period 2.-4. numbers into decimal numbers.
 	chordNumber1 = int(chordBits1, 2)
 	chordValue1 = int(16.5*((2 ** chordNumber1) - 1))	#Formula needed to get the value in luxes.
 	#print(chordValue1)
