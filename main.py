@@ -14,10 +14,7 @@ uart = UART(6, 115200)
 
 i2c = I2C(1, I2C.MASTER, baudrate = 9600)
 i2c2 = I2C(2, I2C.MASTER, baudrate = 9600)
-<<<<<<< HEAD
 
-=======
->>>>>>> 1d676507d55527271dd42b5396b8a32976e89258
 d = char_lcd.HD44780(i2c2)
 
 d.set_line(0) 
@@ -25,15 +22,11 @@ d.set_string("Jotain mukavaa") 					#Print out text on first line on the LCD scr
 d.set_line(1)
 d.set_string("Viela mukavampaa") 				#Print out text on second line on the LCD screen
 
-<<<<<<< HEAD
 
 while True:	
 	sensor = motionS.value()
 	temp = adc.read()							#Read temperature value
 	
-=======
-while True:	
->>>>>>> 1d676507d55527271dd42b5396b8a32976e89258
 	
 	i2c.send(0x43, 0x39)						#Send hexadecimal to receiver from sensor 0.
 	data0 = i2c.recv(1, 0x39)[0]				#Receive value and convert it to binary number.
@@ -65,11 +58,7 @@ while True:
 	#print (countValue1)
 	R = (countValue1)/(countValue0)				#Calculate the ratio of the total values the sensors gave.
 	lightLevel = (countValue0) * 0.46 * (math.e ** (-3.13*R))	#Convert the value given by the light sensor into lux. (math.e is a neper number)
-<<<<<<< HEAD
 	#print(lightLevel)							#Print out the value of the illuminance.
-=======
-	#print(lightLevel)							#Prin out the value of the illuminance.
->>>>>>> 1d676507d55527271dd42b5396b8a32976e89258
 	
 	def changetemp(temp):
 	
@@ -211,7 +200,6 @@ while True:
 				pyb.delay(200)
 			else:
 				print("error")
-<<<<<<< HEAD
 				
 	def beep(beeper):
 	
@@ -232,23 +220,12 @@ while True:
 	changetemp(temp)
 	#beep(beeper)
 	time.sleep(3)
-=======
-		
-			
-
-	#changetemp(temp)
-	keypad()
-	#time.sleep(5)
->>>>>>> 1d676507d55527271dd42b5396b8a32976e89258
 	
 	#sleep = 5000
 	
-<<<<<<< HEAD
 	#while sleep > 0:
 		#pyb.delay(50)
 		#changetemp(temp)
 		#keypad()
 		#sleep = sleep-50
 	
-=======
->>>>>>> 1d676507d55527271dd42b5396b8a32976e89258
