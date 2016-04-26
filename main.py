@@ -14,26 +14,13 @@ uart = UART(6, 115200)
 
 i2c = I2C(1, I2C.MASTER, baudrate = 9600)
 i2c2 = I2C(2, I2C.MASTER, baudrate = 9600)
-<<<<<<< HEAD
 
-=======
->>>>>>> 1d676507d55527271dd42b5396b8a32976e89258
 d = char_lcd.HD44780(i2c2)
 
-d.set_line(0) 
-d.set_string("Jotain mukavaa") 					#Print out text on first line on the LCD screen
-d.set_line(1)
-d.set_string("Viela mukavampaa") 				#Print out text on second line on the LCD screen
-
-<<<<<<< HEAD
-
 while True:	
-	sensor = motionS.value()
+	sensor = (motionS.value()) * 10
 	temp = adc.read()							#Read temperature value
 	
-=======
-while True:	
->>>>>>> 1d676507d55527271dd42b5396b8a32976e89258
 	
 	i2c.send(0x43, 0x39)						#Send hexadecimal to receiver from sensor 0.
 	data0 = i2c.recv(1, 0x39)[0]				#Receive value and convert it to binary number.
@@ -65,11 +52,8 @@ while True:
 	#print (countValue1)
 	R = (countValue1)/(countValue0)				#Calculate the ratio of the total values the sensors gave.
 	lightLevel = (countValue0) * 0.46 * (math.e ** (-3.13*R))	#Convert the value given by the light sensor into lux. (math.e is a neper number)
-<<<<<<< HEAD
+	lightLevel = lightLevel / 10
 	#print(lightLevel)							#Print out the value of the illuminance.
-=======
-	#print(lightLevel)							#Prin out the value of the illuminance.
->>>>>>> 1d676507d55527271dd42b5396b8a32976e89258
 	
 	def changetemp(temp):
 	
@@ -84,7 +68,7 @@ while True:
 			wiw = 5 * wow
 			wuw = 20 + wiw
 			decimaltemp = "%.2f" % wuw
-			print("Temperature is: ", decimaltemp)
+			#print("Temperature is: ", decimaltemp)
 			message(decimaltemp)
 			
 		elif Rx > 1772 and Rx <= 1922:
@@ -94,7 +78,7 @@ while True:
 			wiw = 10 * wow
 			wuw = 10 + wiw
 			decimaltemp = "%.2f" % wuw
-			print("Temperature is: ", decimaltemp)
+			#print("Temperature is: ", decimaltemp)
 			message(decimaltemp)
 		
 		elif Rx > 2000 and Rx <= 2080:
@@ -104,7 +88,7 @@ while True:
 			wiw = 5 * wow
 			wuw = 25 + wiw
 			decimaltemp = "%.2f" % wuw 	
-			print("Temperature is: ", decimaltemp)
+			#print("Temperature is: ", decimaltemp)
 			message(decimaltemp)
 
 	def message(temp):
@@ -113,7 +97,7 @@ while True:
 		array = (sensor, lightLevel, temp)
 		a = str(array)
 
-		print(a)
+		#print(a)
 		sendmessage(a)
 
 	def sendmessage(a):
@@ -163,6 +147,15 @@ while True:
 		#42 = 6
 		#11 = 3
 		
+		d.set_line(0) 
+		d.set_string("Give pincode") 	
+		if c1 == 11:
+			d.set_line(1)
+			d.set_string("Correct")
+		else:
+			d.set_line(1)
+			d.set_string("Incorrect")
+		
 		if c1 != 43:
 			if c1 == 35:
 				print("*")
@@ -211,44 +204,17 @@ while True:
 				pyb.delay(200)
 			else:
 				print("error")
-<<<<<<< HEAD
 				
-	def beep(beeper):
-	
-		
-		
-		if sensor == 0:
-			print("Disturbance in the force")
+	#def beep(beeper):
 			
 			#create a buffer containing a sine-wave
-			buf = bytearray(100)
-			for i in range(len(buf)):
-				buf[i] = 128 + int(127 * math.sin(2 * math.pi * i / len(buf)))
+			#buf = bytearray(100)
+			#for i in range(len(buf)):
+				#buf[i] = 128 + int(127 * math.sin(2 * math.pi * i / len(buf)))
 			
 			#output the sine-wave at 400hz
-			beeper.write_timed(buf, 400 * len(buf), mode = DAC.NORMAL)	
+			#beeper.write_timed(buf, 400 * len(buf), mode = DAC.NORMAL)	
 		
-			
+	keypad()		
 	changetemp(temp)
 	#beep(beeper)
-	time.sleep(3)
-=======
-		
-			
-
-	#changetemp(temp)
-	keypad()
-	#time.sleep(5)
->>>>>>> 1d676507d55527271dd42b5396b8a32976e89258
-	
-	#sleep = 5000
-	
-<<<<<<< HEAD
-	#while sleep > 0:
-		#pyb.delay(50)
-		#changetemp(temp)
-		#keypad()
-		#sleep = sleep-50
-	
-=======
->>>>>>> 1d676507d55527271dd42b5396b8a32976e89258
