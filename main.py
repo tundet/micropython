@@ -6,9 +6,10 @@ import binascii
 import pyb
 print ("kek")
 
-adc = ADC(Pin('X1'))
-motionS = Pin('Y12', Pin.IN, Pin.PULL_UP)
+tempsensor = ADC(Pin('X1'))
+motionsensor = Pin('Y12', Pin.IN, Pin.PULL_UP)
 beeper = DAC(1)
+waterportion = Pin('X11', Pin.OUT_PP)
 
 uart = UART(6, 115200)
 
@@ -18,42 +19,77 @@ i2c2 = I2C(2, I2C.MASTER, baudrate = 9600)
 d = char_lcd.HD44780(i2c2)
 
 while True:	
-	sensor = (motionS.value()) * 10
-	temp = adc.read()							#Read temperature value
+	sensor = (motionsensor.value()) * 10
 	
+	#Read temperature value
+	temp = tempsensor.read()							
 	
-	i2c.send(0x43, 0x39)						#Send hexadecimal to receiver from sensor 0.
-	data0 = i2c.recv(1, 0x39)[0]				#Receive value and convert it to binary number.
+	#Send hexadecimal to receiver from sensor 0.
+	i2c.send(0x43, 0x39)
+	
+	#Receive value and convert it to binary number.
+	data0 = i2c.recv(1, 0x39)[0]				
 	#print(bin(data0)[2:10])	
-	chordBits0 = bin(data0)[3:6]				#Convert binary period 2.-4. numbers into decimal numbers.
+	
+	#Convert binary period 2.-4. numbers into decimal numbers.
+	chordBits0 = bin(data0)[3:6]				
 	chordNumber0 = int(chordBits0, 2)
-	chordValue0 = int(16.5*((2 ** chordNumber0) - 1))	#Formula needed to get the value in luxes.
+	
+	#Formula needed to get the value in luxes.
+	chordValue0 = int(16.5*((2 ** chordNumber0) - 1))	
 	#print(chordValue0)
-	stepValue0 = 2 ** chordNumber0				#Formula needed to get the value in luxes.
+	
+	#Formula needed to get the value in luxes.
+	stepValue0 = 2 ** chordNumber0				
 	#print (stepValue0)
-	stepBits0 = bin(data0)[6:10]				#Convert binary period 5.-8. numbers into decimal numbers.
-	stepNumber0 = int(stepBits0, 2)				#Formula needed to get the value in luxes.
+	
+	#Convert binary period 5.-8. numbers into decimal numbers.
+	#Formula needed to get the value in luxes.
+	stepBits0 = bin(data0)[6:10]				
+	stepNumber0 = int(stepBits0, 2)				
 	#print (stepNumber0)
-	countValue0 = ((chordValue0) + (stepValue0) + (stepNumber0))	#Formula needed to get the value in luxes.
+	
+	#Formula needed to get the value in luxes.
+	countValue0 = ((chordValue0) + (stepValue0) + (stepNumber0))	
 	#print (countValue0)
-	i2c.send(0x83, 0x39)						#Send hexadecimal to receiver from sensor 1.
-	data1 = i2c.recv(1, 0x39)[0]				#Receive value and convert it to binary number.
+	
+	#Send hexadecimal to receiver from sensor 1.
+	#Receive value and convert it to binary number.
+	i2c.send(0x83, 0x39)						
+	data1 = i2c.recv(1, 0x39)[0]				
 	#print(bin(data1)[2:10])
-	chordBits1 = bin(data1)[3:6]				#Convert binary period 2.-4. numbers into decimal numbers.
+	
+	#Convert binary period 2.-4. numbers into decimal numbers.
+	chordBits1 = bin(data1)[3:6]				
 	chordNumber1 = int(chordBits1, 2)
-	chordValue1 = int(16.5*((2 ** chordNumber1) - 1))	#Formula needed to get the value in luxes.
+	
+	#Formula needed to get the value in luxes.
+	chordValue1 = int(16.5*((2 ** chordNumber1) - 1))	
 	#print(chordValue1)
-	stepValue1 = 2 ** chordNumber1				#Formula needed to get the value in luxes.
+	
+	#Formula needed to get the value in luxes.
+	stepValue1 = 2 ** chordNumber1				
 	#print (stepValue1)
-	stepBits1 = bin(data1)[6:10]				#Convert binary period 5.-8. numbers into decimal numbers.
-	stepNumber1 = int(stepBits1, 2)				#Formula needed to get the value in luxes.
+	
+	#Convert binary period 5.-8. numbers into decimal numbers.
+	#Formula needed to get the value in luxes.
+	stepBits1 = bin(data1)[6:10]				
+	stepNumber1 = int(stepBits1, 2)				
 	#print (stepNumber1)
-	countValue1 = ((chordValue1) + (stepValue1) + (stepNumber1))	#Formula needed to get the value in luxes.
+	
+	#Formula needed to get the value in luxes.
+	countValue1 = ((chordValue1) + (stepValue1) + (stepNumber1))	
 	#print (countValue1)
-	R = (countValue1)/(countValue0)				#Calculate the ratio of the total values the sensors gave.
-	lightLevel = (countValue0) * 0.46 * (math.e ** (-3.13*R))	#Convert the value given by the light sensor into lux. (math.e is a neper number)
+	
+	#Calculate the ratio of the total values the sensors gave.
+	R = (countValue1)/(countValue0)	
+
+	#Convert the value given by the light sensor into lux. (math.e is a neper number)
+	lightLevel = (countValue0) * 0.46 * (math.e ** (-3.13*R))	
 	lightLevel = lightLevel / 10
-	#print(lightLevel)							#Print out the value of the illuminance.
+	
+	#Print out the value of the illuminance.
+	#print(lightLevel)							
 	
 	def changetemp(temp):
 	
@@ -147,14 +183,30 @@ while True:
 		#42 = 6
 		#11 = 3
 		
-		d.set_line(0) 
-		d.set_string("Give pincode") 	
+		#pincode = [1,2,3,4]
+		#while True:
+			#password = input("Give password pls")
+			#if password == 1:
+		wpvalue = waterportion.value()		
+		
 		if c1 == 11:
+			d.set_line(0)
+			d.set_string("WOW!")
 			d.set_line(1)
-			d.set_string("Correct")
+			d.set_string("Water coming")
+			wpvalue = waterportion.value(1)
+		elif c1 == 43 and c2 == 43 and c3 == 43:
+			d.set_line(0) 
+			d.set_string('Press 1 for')
+			d.set_line(1)
+			d.set_string("water") 
+			wpvalue = waterportion.value(0)
 		else:
+			d.set_line(0) 
+			d.set_string("You've had")
 			d.set_line(1)
-			d.set_string("Incorrect")
+			d.set_string("enough")
+			wpvalue = waterportion.value(0)
 		
 		if c1 != 43:
 			if c1 == 35:
@@ -218,3 +270,6 @@ while True:
 	keypad()		
 	changetemp(temp)
 	#beep(beeper)
+	
+
+
