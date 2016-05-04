@@ -11,6 +11,9 @@ motionsensor = Pin('Y12', Pin.IN, Pin.PULL_UP)
 beeper = DAC(1)
 waterportion = Pin('X11', Pin.OUT_PP)
 
+doortrigger = Pin('Y7', Pin.IN, Pin.PULL_UP)
+doortrigger2 = Pin('Y8', Pin.IN, Pin.PULL_UP)
+
 uart = UART(6, 115200)
 
 i2c = I2C(1, I2C.MASTER, baudrate = 9600)
@@ -29,7 +32,6 @@ while True:
 	
 	#Receive value and convert it to binary number.
 	data0 = i2c.recv(1, 0x39)[0]				
-	#print(bin(data0)[2:10])	
 	
 	#Convert binary period 2.-4. numbers into decimal numbers.
 	chordBits0 = bin(data0)[3:6]				
@@ -37,27 +39,22 @@ while True:
 	
 	#Formula needed to get the value in luxes.
 	chordValue0 = int(16.5*((2 ** chordNumber0) - 1))	
-	#print(chordValue0)
 	
 	#Formula needed to get the value in luxes.
 	stepValue0 = 2 ** chordNumber0				
-	#print (stepValue0)
 	
 	#Convert binary period 5.-8. numbers into decimal numbers.
 	#Formula needed to get the value in luxes.
 	stepBits0 = bin(data0)[6:10]				
 	stepNumber0 = int(stepBits0, 2)				
-	#print (stepNumber0)
 	
 	#Formula needed to get the value in luxes.
 	countValue0 = ((chordValue0) + (stepValue0) + (stepNumber0))	
-	#print (countValue0)
 	
 	#Send hexadecimal to receiver from sensor 1.
 	#Receive value and convert it to binary number.
 	i2c.send(0x83, 0x39)						
 	data1 = i2c.recv(1, 0x39)[0]				
-	#print(bin(data1)[2:10])
 	
 	#Convert binary period 2.-4. numbers into decimal numbers.
 	chordBits1 = bin(data1)[3:6]				
@@ -65,21 +62,17 @@ while True:
 	
 	#Formula needed to get the value in luxes.
 	chordValue1 = int(16.5*((2 ** chordNumber1) - 1))	
-	#print(chordValue1)
 	
 	#Formula needed to get the value in luxes.
 	stepValue1 = 2 ** chordNumber1				
-	#print (stepValue1)
 	
 	#Convert binary period 5.-8. numbers into decimal numbers.
 	#Formula needed to get the value in luxes.
 	stepBits1 = bin(data1)[6:10]				
 	stepNumber1 = int(stepBits1, 2)				
-	#print (stepNumber1)
 	
 	#Formula needed to get the value in luxes.
 	countValue1 = ((chordValue1) + (stepValue1) + (stepNumber1))	
-	#print (countValue1)
 	
 	#Calculate the ratio of the total values the sensors gave.
 	R = (countValue1)/(countValue0)	
@@ -87,9 +80,6 @@ while True:
 	#Convert the value given by the light sensor into lux. (math.e is a neper number)
 	lightLevel = (countValue0) * 0.46 * (math.e ** (-3.13*R))	
 	lightLevel = lightLevel / 10
-	
-	#Print out the value of the illuminance.
-	#print(lightLevel)							
 	
 	def changetemp(temp):
 	
@@ -104,7 +94,6 @@ while True:
 			wiw = 5 * wow
 			wuw = 20 + wiw
 			decimaltemp = "%.2f" % wuw
-			#print("Temperature is: ", decimaltemp)
 			message(decimaltemp)
 			
 		elif Rx > 1772 and Rx <= 1922:
@@ -114,7 +103,6 @@ while True:
 			wiw = 10 * wow
 			wuw = 10 + wiw
 			decimaltemp = "%.2f" % wuw
-			#print("Temperature is: ", decimaltemp)
 			message(decimaltemp)
 		
 		elif Rx > 2000 and Rx <= 2080:
@@ -124,16 +112,19 @@ while True:
 			wiw = 5 * wow
 			wuw = 25 + wiw
 			decimaltemp = "%.2f" % wuw 	
-			#print("Temperature is: ", decimaltemp)
 			message(decimaltemp)
+	
+	trigger1 = doortrigger.value()
+	trigger2 = doortrigger2.value()
+	doortriggervalue = 10 * (trigger1 + trigger2)
 
+	
 	def message(temp):
 	
-		#Creating message.
-		array = (sensor, lightLevel, temp)
+		#Creating message
+		array = (sensor, lightLevel, temp, doortriggervalue)
 		a = str(array)
 
-		#print(a)
 		sendmessage(a)
 
 	def sendmessage(a):
@@ -157,36 +148,17 @@ while True:
 		i2c2.mem_write(0xEF, 0x20, 0x00)
 		k1 = i2c2.mem_read(1, 0x20, 0x12)
 		c1 = k1[0] & 0x2B
-		#print(c1)
-		#35 = *
-		#41 = 7
-		#42 = 4
-		#11 = 1
 		
 		#Reading (COL2)
 		i2c2.mem_write(0xBF, 0x20, 0x00)
 		k2 = i2c2.mem_read(1, 0x20, 0x12)
 		c2 = k2[0] & 0x2B
-		#print(c2)
-		#35 = 0
-		#41 = 8
-		#42 = 5
-		#11 = 2
 		
 		#Reading (COL3)
 		i2c2.mem_write(0xFB, 0x20, 0x00)
 		k3 = i2c2.mem_read(1, 0x20, 0x12)
 		c3 = k3[0] & 0x2B
-		#print(c3)
-		#35 = #
-		#41 = 9
-		#42 = 6
-		#11 = 3
 		
-		#pincode = [1,2,3,4]
-		#while True:
-			#password = input("Give password pls")
-			#if password == 1:
 		wpvalue = waterportion.value()		
 		
 		if c1 == 11:
@@ -256,20 +228,7 @@ while True:
 				pyb.delay(200)
 			else:
 				print("error")
-				
-	#def beep(beeper):
-			
-			#create a buffer containing a sine-wave
-			#buf = bytearray(100)
-			#for i in range(len(buf)):
-				#buf[i] = 128 + int(127 * math.sin(2 * math.pi * i / len(buf)))
-			
-			#output the sine-wave at 400hz
-			#beeper.write_timed(buf, 400 * len(buf), mode = DAC.NORMAL)	
 		
 	keypad()		
 	changetemp(temp)
-	#beep(beeper)
 	
-
-
