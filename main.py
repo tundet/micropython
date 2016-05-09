@@ -179,7 +179,7 @@ while True:
 				print("error")
 
 	def beep(beeper):
-		if sensor == 10:
+		if sensor == 0:
 			#create a buffer containing a sine-wave
 			buf = bytearray(100)
 			for i in range(len(buf)):
