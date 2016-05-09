@@ -4,6 +4,7 @@ import time
 import math
 import binascii
 import pyb
+from light import lightvalue
 print ("kek")
 
 tempsensor = ADC(Pin('X1'))
@@ -25,61 +26,9 @@ while True:
 	sensor = (motionsensor.value()) * 10
 	
 	#Read temperature value
-	temp = tempsensor.read()							
+	temp = tempsensor.read()
 	
-	#Send hexadecimal to receiver from sensor 0.
-	i2c.send(0x43, 0x39)
-	
-	#Receive value and convert it to binary number.
-	data0 = i2c.recv(1, 0x39)[0]				
-	
-	#Convert binary period 2.-4. numbers into decimal numbers.
-	chordBits0 = bin(data0)[3:6]				
-	chordNumber0 = int(chordBits0, 2)
-	
-	#Formula needed to get the value in luxes.
-	chordValue0 = int(16.5*((2 ** chordNumber0) - 1))	
-	
-	#Formula needed to get the value in luxes.
-	stepValue0 = 2 ** chordNumber0				
-	
-	#Convert binary period 5.-8. numbers into decimal numbers.
-	#Formula needed to get the value in luxes.
-	stepBits0 = bin(data0)[6:10]				
-	stepNumber0 = int(stepBits0, 2)				
-	
-	#Formula needed to get the value in luxes.
-	countValue0 = ((chordValue0) + (stepValue0) + (stepNumber0))	
-	
-	#Send hexadecimal to receiver from sensor 1.
-	#Receive value and convert it to binary number.
-	i2c.send(0x83, 0x39)						
-	data1 = i2c.recv(1, 0x39)[0]				
-	
-	#Convert binary period 2.-4. numbers into decimal numbers.
-	chordBits1 = bin(data1)[3:6]				
-	chordNumber1 = int(chordBits1, 2)
-	
-	#Formula needed to get the value in luxes.
-	chordValue1 = int(16.5*((2 ** chordNumber1) - 1))	
-	
-	#Formula needed to get the value in luxes.
-	stepValue1 = 2 ** chordNumber1				
-	
-	#Convert binary period 5.-8. numbers into decimal numbers.
-	#Formula needed to get the value in luxes.
-	stepBits1 = bin(data1)[6:10]				
-	stepNumber1 = int(stepBits1, 2)				
-	
-	#Formula needed to get the value in luxes.
-	countValue1 = ((chordValue1) + (stepValue1) + (stepNumber1))	
-	
-	#Calculate the ratio of the total values the sensors gave.
-	R = (countValue1)/(countValue0)	
-
-	#Convert the value given by the light sensor into lux. (math.e is a neper number)
-	lightLevel = (countValue0) * 0.46 * (math.e ** (-3.13*R))	
-	lightLevel = lightLevel / 10
+	lightLevel = lightvalue(i2c) / 10
 	
 	def changetemp(temp):
 	
@@ -228,7 +177,18 @@ while True:
 				pyb.delay(200)
 			else:
 				print("error")
-		
+
+	def beep(beeper):
+		if sensor == 10:
+			#create a buffer containing a sine-wave
+			buf = bytearray(100)
+			for i in range(len(buf)):
+				buf[i] = 128 + int(127 * math.sin(2 * math.pi * i / len(buf)))
+				
+			#output the sine-wave at 400hz
+			beeper.write_timed(buf, 400 * len(buf), mode = DAC.NORMAL)
+
 	keypad()		
 	changetemp(temp)
+	beep(beeper)
 	
