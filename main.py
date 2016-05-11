@@ -7,6 +7,7 @@ import pyb
 from light import lightvalue
 print ("kek")
 
+#Define sensors
 tempsensor = ADC(Pin('X1'))
 motionsensor = Pin('Y12', Pin.IN, Pin.PULL_UP)
 beeper = DAC(1)
@@ -15,19 +16,25 @@ waterportion = Pin('X11', Pin.OUT_PP)
 doortrigger = Pin('Y7', Pin.IN, Pin.PULL_UP)
 doortrigger2 = Pin('Y8', Pin.IN, Pin.PULL_UP)
 
+#Define UART bus and I2C bus 
 uart = UART(6, 115200)
 
 i2c = I2C(1, I2C.MASTER, baudrate = 9600)
 i2c2 = I2C(2, I2C.MASTER, baudrate = 9600)
 
+#Define LCD
 d = char_lcd.HD44780(i2c2)
 
+#Loop starts
 while True:	
+	
+	#Read motionsensor value
 	sensor = (motionsensor.value()) * 10
 	
 	#Read temperature value
 	temp = tempsensor.read()
 	
+	#Reaad light level value
 	lightLevel = lightvalue(i2c) / 10
 	
 	def changetemp(temp):
@@ -63,6 +70,7 @@ while True:
 			decimaltemp = "%.2f" % wuw 	
 			message(decimaltemp)
 	
+	#Define doortrigger value
 	trigger1 = doortrigger.value()
 	trigger2 = doortrigger2.value()
 	doortriggervalue = 10 * (trigger1 + trigger2)
@@ -108,20 +116,25 @@ while True:
 		k3 = i2c2.mem_read(1, 0x20, 0x12)
 		c3 = k3[0] & 0x2B
 		
+		#Define waterportion value
 		wpvalue = waterportion.value()		
 		
+		#When keypad's number 1 is pressed water flows
 		if c1 == 11:
 			d.set_line(0)
 			d.set_string("WOW!")
 			d.set_line(1)
 			d.set_string("Water coming")
 			wpvalue = waterportion.value(1)
+			
+		#When no buttons are pressed water flow stops
 		elif c1 == 43 and c2 == 43 and c3 == 43:
 			d.set_line(0) 
 			d.set_string('Press 1 for')
 			d.set_line(1)
 			d.set_string("water") 
 			wpvalue = waterportion.value(0)
+		
 		else:
 			d.set_line(0) 
 			d.set_string("You've had")
@@ -129,6 +142,7 @@ while True:
 			d.set_string("enough")
 			wpvalue = waterportion.value(0)
 		
+		#Print the button that is pressed
 		if c1 != 43:
 			if c1 == 35:
 				print("*")
