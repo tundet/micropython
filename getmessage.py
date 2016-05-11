@@ -1,7 +1,6 @@
 import serial
 import subprocess
 import time
-#import rrdtool
 import sys
 port = serial.Serial('/dev/ttyAMA0', 115200, timeout = 30)
 
